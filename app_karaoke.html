@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Karaoke VIP - Grand Casino</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --magenta: #ff007f;
+            --cyan: #00f3ff;
+            --gold: #ffcc00;
+            --dark-bg: #09090e;
+            --glass: rgba(25, 25, 35, 0.6);
+        }
+
+        * { box-sizing: border-box; outline: none; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            color: #fff;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            background: linear-gradient(135deg, #09090e 0%, #1a0b2e 50%, #0d001a 100%);
+            background-size: 400% 400%;
+            animation: bgShift 15s ease infinite;
+        }
+
+        @keyframes bgShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+        /* Estrellas y destellos */
+        .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+        .star {
+            position: absolute; background: #fff; border-radius: 50%;
+            box-shadow: 0 0 10px #fff, 0 0 20px var(--cyan);
+            animation: floatStar linear infinite; opacity: 0;
+        }
+        @keyframes floatStar {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(-10vh) scale(1.5); opacity: 0; }
+        }
+
+        .container {
+            width: 100%; max-width: 450px; padding: 40px 20px;
+            display: flex; flex-direction: column; align-items: center;
+            position: relative; z-index: 10;
+        }
+
+        #main-view, #admin-view {
+            width: 100%; display: flex; flex-direction: column; align-items: center;
+            animation: popIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes popIn { 0% { opacity: 0; transform: scale(0.9) translateY(30px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
+
+        #admin-view { display: none; max-width: 900px; }
+
+        /* Logo Corregido para Google Drive */
+        .logo {
+            width: 100%; max-width: 280px; margin-bottom: 20px;
+            filter: drop-shadow(0 0 25px rgba(255, 204, 0, 0.6));
+            animation: hoverLogo 4s ease-in-out infinite;
+        }
+        @keyframes hoverLogo { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+        /* Reloj Premium Neón */
+        .clock-wrapper {
+            background: var(--glass); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(0, 243, 255, 0.3); border-radius: 20px;
+            padding: 20px 40px; margin-bottom: 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5), inset 0 0 20px rgba(0, 243, 255, 0.1);
+            width: 100%; text-align: center;
+        }
+
+        .clock {
+            font-size: 3.5em; font-weight: 900;
+            background: linear-gradient(45deg, #fff, var(--cyan), var(--magenta));
+            background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            animation: textShine 4s linear infinite; letter-spacing: 2px; line-height: 1.1;
+        }
+        @keyframes textShine { to { background-position: 200% center; } }
+        
+        .status-text { color: #aaa; font-size: 0.9em; font-weight: 800; letter-spacing: 3px; text-transform: uppercase; margin-top: 5px; }
+
+        /* Formulario Flotante */
+        form { width: 100%; display: flex; flex-direction: column; gap: 20px; }
+        .input-group { position: relative; width: 100%; }
+        
+        .input-group input {
+            width: 100%; padding: 25px 20px 10px 50px;
+            background: rgba(10, 10, 15, 0.8); border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff; border-radius: 15px; font-size: 1.1em; font-weight: 600; font-family: 'Poppins', sans-serif;
+            transition: 0.3s;
+        }
+        .input-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); font-size: 1.4em; color: rgba(255,255,255,0.4); transition: 0.3s; }
+        .input-group label {
+            position: absolute; left: 55px; top: 18px; color: rgba(255,255,255,0.4);
+            font-size: 1em; font-weight: 600; pointer-events: none; transition: 0.3s;
+        }
+
+        .input-group input:focus, .input-group input:valid {
+            border-color: var(--cyan); background: rgba(0, 40, 50, 0.5); box-shadow: 0 0 20px rgba(0, 243, 255, 0.2);
+        }
+        .input-group input:focus ~ label, .input-group input:valid ~ label {
+            top: 6px; font-size: 0.75em; color: var(--cyan); text-transform: uppercase; letter-spacing: 1px;
+        }
+        .input-group input:focus ~ .input-icon, .input-group input:valid ~ .input-icon { color: var(--cyan); filter: drop-shadow(0 0 8px var(--cyan)); }
+
+        /* Botón Líquido */
+        button.neon-btn {
+            width: 100%; padding: 20px; margin-top: 10px;
+            background: linear-gradient(90deg, var(--magenta), #ff5e00, var(--magenta)); background-size: 200% auto;
+            color: #fff; border: none; border-radius: 15px; font-size: 1.3em; font-weight: 900;
+            letter-spacing: 3px; text-transform: uppercase; cursor: pointer; transition: 0.4s;
+            box-shadow: 0 10px 30px rgba(255, 0, 127, 0.5);
+        }
+        button.neon-btn:hover { background-position: right center; transform: translateY(-3px); box-shadow: 0 15px 40px rgba(255, 0, 127, 0.8); }
+        button:disabled { background: #222; color: #555; box-shadow: none; cursor: not-allowed; transform: none; }
+
+        /* Tarjeta de Resultado 3D */
+        .result-card {
+            display: none; width: 100%;
+            background: linear-gradient(135deg, rgba(30,10,20,0.95), rgba(10,5,15,0.95));
+            border: 2px solid var(--gold); border-radius: 20px; padding: 45px 20px; text-align: center;
+            box-shadow: 0 20px 50px rgba(255, 204, 0, 0.3), inset 0 0 30px rgba(255, 204, 0, 0.1);
+            position: relative; overflow: hidden;
+        }
+        .result-card::before {
+            content: ''; position: absolute; top: -100%; left: -100%; width: 50%; height: 300%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.2), transparent);
+            transform: rotate(35deg); animation: flash 3s infinite;
+        }
+        @keyframes flash { 0% { left: -100%; } 20%, 100% { left: 200%; } }
+
+        .result-card h2 { color: #fff; font-size: 2em; margin: 0; text-shadow: 0 0 15px var(--magenta); }
+        .turn-number { 
+            font-size: 8em; font-weight: 900; color: var(--gold);
+            text-shadow: 0 0 30px var(--gold), 0 0 60px rgba(255, 204, 0, 0.5);
+            margin: 5px 0; line-height: 1; font-family: monospace;
+        }
+        .time-reg { font-size: 1em; color: #aaa; margin-top: 15px; font-weight: 600; }
+
+        /* Loader */
+        #loader { display: none; text-align: center; margin-top: 20px; }
+        .spinner {
+            width: 60px; height: 60px; margin: 0 auto 15px auto; border-radius: 50%;
+            border: 6px solid rgba(0, 243, 255, 0.1); border-top-color: var(--cyan);
+            animation: spin 1s linear infinite; box-shadow: 0 0 20px rgba(0, 243, 255, 0.4);
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        #loader p { color: var(--cyan); font-weight: 900; letter-spacing: 2px; }
+
+        /* Banner de Prueba */
+        .test-banner {
+            display: none; background: var(--magenta); color: #fff; padding: 10px 30px;
+            border-radius: 30px; font-weight: 900; margin-bottom: 20px;
+            box-shadow: 0 0 20px var(--magenta); animation: popIn 0.5s; text-transform: uppercase;
+        }
+
+        /* Admin */
+        .admin-trigger { position: fixed; bottom: 20px; right: 20px; color: rgba(255,255,255,0.2); font-size: 2em; cursor: pointer; transition: 0.3s; z-index: 100; }
+        .admin-trigger:hover { color: var(--cyan); transform: rotate(90deg) scale(1.2); filter: drop-shadow(0 0 10px var(--cyan)); }
+
+        #password-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 200; justify-content: center; align-items: center; backdrop-filter: blur(10px); }
+        .modal-content { background: var(--glass); padding: 40px; border-radius: 20px; border: 1px solid var(--magenta); width: 90%; max-width: 350px; text-align: center; }
+        .modal-content h3 { margin-bottom: 20px; color: #fff; }
+        .modal-content button { margin-top: 20px; width: 100%; padding: 15px; background: var(--magenta); color: #fff; border: none; border-radius: 10px; font-weight: 900; cursor: pointer; font-size: 1.1em; transition: 0.3s; }
+        .modal-content button:hover { box-shadow: 0 0 20px var(--magenta); }
+
+        .admin-header { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
+        .toggle-container { background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 15px; display: flex; align-items: center; gap: 15px; border: 1px solid rgba(255,255,255,0.1); }
+        
+        .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; border-radius: 30px; transition: .4s; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; border-radius: 50%; transition: .4s; }
+        input:checked + .slider { background-color: var(--magenta); box-shadow: 0 0 15px var(--magenta); }
+        input:checked + .slider:before { transform: translateX(24px); }
+
+        .btn-external { background: var(--cyan); color: #000; padding: 10px 20px; border: none; border-radius: 10px; font-weight: 900; text-decoration: none; }
+        .btn-back { background: transparent; border: 2px solid #555; color: #fff; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: bold; }
+        
+        .iframe-container { width: 100%; height: 75vh; border-radius: 20px; overflow: hidden; background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.8); border: 2px solid rgba(0, 243, 255, 0.3); }
+        iframe { width: 100%; height: 100%; border: none; }
+    </style>
+</head>
+<body>
+
+    <!-- Estrellas de fondo -->
+    <div class="stars" id="stars"></div>
+
+    <div class="container" id="main-view">
+        <div class="test-banner" id="test-banner">⚠️ SISTEMA DE PRUEBA</div>
+
+        <!-- LOGO ACTUALIZADO PARA CARGAR DIRECTO DE DRIVE -->
+        <img src="https://lh3.googleusercontent.com/d/1-43KPo4nGvnDBYynkbF83nkup4wYyuz9" alt="Grand Casino" class="logo">
+
+        <div class="clock-wrapper">
+            <div class="clock" id="clock">00:00:00</div>
+            <div class="status-text" id="status-text">Sincronizando...</div>
+        </div>
+
+        <form id="karaoke-form">
+            <div class="input-group">
+                <input type="text" id="nombre" required autocomplete="off">
+                <label>Nombre Completo</label>
+                <span class="input-icon">👤</span>
+            </div>
+            <div class="input-group">
+                <input type="text" id="cancion" required autocomplete="off">
+                <label>Canción a Interpretar</label>
+                <span class="input-icon">🎵</span>
+            </div>
+            <div class="input-group">
+                <input type="text" id="artista" required autocomplete="off">
+                <label>Artista Original</label>
+                <span class="input-icon">🎤</span>
+            </div>
+            <button type="submit" id="submit-btn" class="neon-btn">OBTENER LUGAR</button>
+        </form>
+
+        <div id="loader">
+            <div class="spinner"></div>
+            <p>GENERANDO PASE...</p>
+        </div>
+
+        <div id="result-card" class="result-card">
+            <h2>¡ESTÁS DENTRO!</h2>
+            <p style="color:#bbb; font-weight: 800; letter-spacing: 1px; margin-top: 15px;">TU PASE VIP ES EL:</p>
+            <div class="turn-number" id="display-turn">00</div>
+            <div class="time-reg" id="display-time">Hora: --:--</div>
+        </div>
+    </div>
+
+    <!-- ADMIN -->
+    <div class="admin-trigger" onclick="openAdminLogin()">⚙️</div>
+
+    <div id="password-modal">
+        <div class="modal-content">
+            <h3>PANEL DE CONTROL</h3>
+            <div class="input-group" style="margin-top:20px;">
+                <input type="password" id="admin-pass" required>
+                <label>PIN Admin</label>
+                <span class="input-icon">🔒</span>
+            </div>
+            <button onclick="checkPassword()">ENTRAR</button>
+            <button style="background:transparent; color:#888; box-shadow:none; font-size:0.9em; margin-top:10px;" onclick="closeAdminLogin()">CERRAR</button>
+        </div>
+    </div>
+
+    <div class="container" id="admin-view">
+        <div class="admin-header">
+            <h1 style="color:var(--cyan);">SISTEMA</h1>
+            <div class="admin-controls">
+                <div class="toggle-container">
+                    <span>Modo Prueba</span>
+                    <label class="switch">
+                        <input type="checkbox" id="test-mode-toggle" onchange="toggleTestMode()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <a href="https://docs.google.com/spreadsheets/d/1WwuF8K-GT6K1KYJVndka5Ovm4lFJH0UQ02HWu2ehBpk/edit?usp=sharing" target="_blank" class="btn-external">EXCEL</a>
+                <button class="btn-back" onclick="logoutAdmin()">SALIR</button>
+            </div>
+        </div>
+        <div class="iframe-container">
+            <iframe src="https://docs.google.com/spreadsheets/d/1WwuF8K-GT6K1KYJVndka5Ovm4lFJH0UQ02HWu2ehBpk/htmlembed?widget=true&amp;headers=true"></iframe>
+        </div>
+    </div>
+
+    <script>
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyhCuOdf1qCXQiaHcl9nAIxE4XpXstAU2v__WTocVxVo43_eKlIRfsYyyupohfv88Xd/exec';
+
+        let isTestMode = false;
+        const clockEl = document.getElementById('clock');
+        const statusEl = document.getElementById('status-text');
+        const btn = document.getElementById('submit-btn');
+        const form = document.getElementById('karaoke-form');
+        const loader = document.getElementById('loader');
+        const resultCard = document.getElementById('result-card');
+        const testBanner = document.getElementById('test-banner');
+        const turnDisplay = document.getElementById('display-turn');
+
+        // Crear Estrellas Animadas
+        function initStars() {
+            const container = document.getElementById('stars');
+            for(let i=0; i<30; i++) {
+                let s = document.createElement('div');
+                s.className = 'star';
+                s.style.left = Math.random() * 100 + 'vw';
+                s.style.width = Math.random() * 4 + 2 + 'px';
+                s.style.height = s.style.width;
+                s.style.animationDuration = Math.random() * 4 + 3 + 's';
+                s.style.animationDelay = Math.random() * 5 + 's';
+                container.appendChild(s);
+            }
+        }
+        initStars();
+
+        function updateClock() {
+            const now = new Date();
+            const h = String(now.getHours()).padStart(2, '0');
+            const m = String(now.getMinutes()).padStart(2, '0');
+            const s = String(now.getSeconds()).padStart(2, '0');
+            clockEl.textContent = `${h}:${m}:${s}`;
+
+            const currentHour = now.getHours();
+
+            if (isTestMode) {
+                btn.disabled = false; btn.textContent = "REGISTRO (PRUEBA)";
+                statusEl.textContent = "⚙️ MODO PRUEBA ⚙️"; statusEl.style.color = "var(--magenta)";
+            } else if (currentHour < 21) {
+                btn.disabled = true; btn.textContent = "ESPERA A LAS 21:00 HRS";
+                statusEl.textContent = "CERRADO"; statusEl.style.color = "#ff3333";
+            } else if (currentHour >= 21 && currentHour < 22) {
+                btn.disabled = false; btn.textContent = "OBTENER PASE VIP";
+                statusEl.textContent = "🔥 ABIERTO 🔥"; statusEl.style.color = "var(--gold)";
+            } else {
+                btn.disabled = false; btn.textContent = "PARTICIPAR";
+                statusEl.textContent = "REGISTRO GENERAL"; statusEl.style.color = "var(--cyan)";
+            }
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        function animateSlotMachine(finalNumber, duration) {
+            let startTime = null;
+            turnDisplay.style.filter = "blur(3px)";
+            const step = (timestamp) => {
+                if (!startTime) startTime = timestamp;
+                const progress = Math.min((timestamp - startTime) / duration, 1);
+                turnDisplay.textContent = Math.floor(Math.random() * 99) + 1;
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                } else {
+                    turnDisplay.style.filter = "blur(0)";
+                    turnDisplay.textContent = finalNumber;
+                    turnDisplay.style.transform = "scale(1.2)";
+                    setTimeout(() => turnDisplay.style.transform = "scale(1)", 200);
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            btn.style.display = 'none';
+            form.style.opacity = '0';
+            
+            setTimeout(() => {
+                form.style.display = 'none';
+                loader.style.display = 'block';
+
+                const data = {
+                    nombre: document.getElementById('nombre').value.toUpperCase(),
+                    cancion: document.getElementById('cancion').value.toUpperCase(),
+                    artista: document.getElementById('artista').value.toUpperCase(),
+                    modo_prueba: isTestMode
+                };
+
+                fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(data) })
+                    .then(res => res.json())
+                    .then(res => {
+                        loader.style.display = 'none';
+                        if (res.status === 'success') {
+                            resultCard.style.display = 'block';
+                            animateSlotMachine(res.turno, 2000);
+                            document.getElementById('display-time').textContent = "Registro: " + res.timestamp;
+                        } else {
+                            alert("Error: " + res.message);
+                            btn.style.display = 'block';
+                            form.style.display = 'flex'; form.style.opacity = '1';
+                        }
+                    })
+                    .catch(err => {
+                        loader.style.display = 'none';
+                        resultCard.style.display = 'block';
+                        animateSlotMachine("✓", 1000);
+                        document.getElementById('display-time').textContent = "Cargando...";
+                    });
+            }, 300);
+        });
+
+        const adminModal = document.getElementById('password-modal');
+        const mainView = document.getElementById('main-view');
+        const adminView = document.getElementById('admin-view');
+        const passInput = document.getElementById('admin-pass');
+        const testToggle = document.getElementById('test-mode-toggle');
+
+        function openAdminLogin() { adminModal.style.display = 'flex'; passInput.value = ''; passInput.focus(); }
+        function closeAdminLogin() { adminModal.style.display = 'none'; }
+
+        function checkPassword() {
+            if (passInput.value === '13141569') {
+                closeAdminLogin(); mainView.style.display = 'none'; adminView.style.display = 'flex';
+            } else {
+                passInput.style.borderColor = "var(--magenta)";
+                passInput.value = '';
+            }
+        }
+
+        function logoutAdmin() {
+            adminView.style.display = 'none'; mainView.style.display = 'flex';
+            const iframe = document.querySelector('iframe'); iframe.src = iframe.src;
+        }
+
+        function toggleTestMode() {
+            isTestMode = testToggle.checked;
+            testBanner.style.display = isTestMode ? 'block' : 'none';
+            updateClock();
+        }
+
+        passInput.addEventListener("keypress", function (event) {
+            if (event.key === "Enter") { event.preventDefault(); checkPassword(); }
+        });
+    </script>
+</body>
+</html>
